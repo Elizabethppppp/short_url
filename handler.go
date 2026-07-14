@@ -3,20 +3,24 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	server "github.com/Elizabethppppp/tcp_server"
+	"github.com/yihleego/base62"
 )
 
 type URLstore struct {
-	links map[string]string
-	count map[string]int
+	links   map[string]string
+	count   map[string]int
+	counter uint64
 }
 
 func NewURLstore() *URLstore {
 	return &URLstore{
-		links: make(map[string]string),
-		count: make(map[string]int),
+		links:   make(map[string]string),
+		count:   make(map[string]int),
+		counter: 100000000000,
 	}
 }
 
@@ -61,13 +65,13 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	shortURL = generateShortURL(originalURL)
+	shortURL = u.generateShortURL()
 
 	for {
 		if _, in := u.links[shortURL]; !in {
 			break
 		}
-		shortURL = generateShortURL(originalURL + shortURL)
+		shortURL = u.generateShortURL()
 	}
 
 	u.links[shortURL] = originalURL
@@ -78,6 +82,16 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	w.Write([]byte(response))
 }
 
-func generateShortURL(originalURL string) string {
-	return originalURL
+func (u *URLstore) generateShortURL() string {
+	u.counter++
+
+	str := strconv.FormatUint(u.counter, 10)
+	encoded := base62.StdEncoding.Encode([]byte(str))
+
+	result := string(encoded)
+	if len(result) < 7 {
+		result = "0" + result
+	}
+
+	return result
 }
