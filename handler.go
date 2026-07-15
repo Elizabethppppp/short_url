@@ -95,3 +95,36 @@ func (u *URLstore) generateShortURL() string {
 
 	return result
 }
+
+// get method
+func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(405)
+		w.Write([]byte("Method Not Allowed"))
+		return
+	}
+
+	path := r.Path
+
+	shortURL := strings.TrimPrefix(path, "/")
+
+	if shortURL == "" {
+		w.WriteHeader(400)
+		w.Write([]byte("Bad request"))
+		return
+	}
+
+	originalURL, inMap := u.links[shortURL]
+
+	if !inMap {
+		w.WriteHeader(404)
+		w.Write([]byte("Not Found"))
+		return
+	}
+
+	u.count[shortURL]++
+
+	w.SetHeader("Location", originalURL)
+	w.WriteHeader(302)
+	w.Write([]byte("Redirecting to " + originalURL))
+}
