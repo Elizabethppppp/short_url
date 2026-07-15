@@ -3,11 +3,9 @@ package main
 import (
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 
 	server "github.com/Elizabethppppp/tcp_server"
-	"github.com/yihleego/base62"
 )
 
 type URLstore struct {
@@ -80,20 +78,6 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	response := fmt.Sprintf(`{"shortURL":"http://localhost:8080/%s"}`, shortURL)
 	w.WriteHeader(200)
 	w.Write([]byte(response))
-}
-
-func (u *URLstore) generateShortURL() string {
-	u.counter++
-
-	str := strconv.FormatUint(u.counter, 10)
-	encoded := base62.StdEncoding.Encode([]byte(str))
-
-	result := string(encoded)
-	if len(result) < 7 {
-		result = "0" + result
-	}
-
-	return result
 }
 
 // get method
