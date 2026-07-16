@@ -10,12 +10,16 @@ func toBase62(num uint64) string {
 	var result []byte
 	for num > 0 {
 		s := num % 62
-		result = append([]byte{alphabet[s]}, result...)
+		result = append(result, alphabet[s])
 		num = num / 62
 	}
 
 	if len(result) < 7 {
-		result = append([]byte{0}, result...)
+		result = append(result, alphabet[0])
+	}
+
+	for i := 0; i < len(result)/2; i++ {
+		result[i], result[len(result)-1-i] = result[len(result)-1-i], result[i]
 	}
 
 	return string(result)

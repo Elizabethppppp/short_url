@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 
 	server "github.com/Elizabethppppp/tcp_server"
@@ -25,7 +24,7 @@ func NewURLstore() *URLstore {
 // post method
 func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	if r.Method != "POST" {
-		w.WriteHeader(405)
+		w.WriteHeader(server.StatusMethodNotAllowed)
 		w.Write([]byte("Method Not Allowed"))
 		return
 	}
@@ -33,14 +32,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	originalURL := strings.TrimSpace(string(r.Body))
 
 	if originalURL == "" {
-		w.WriteHeader(400)
-		w.Write([]byte("Bad request"))
-		return
-	}
-
-	parsedURL, err := url.ParseRequestURI(originalURL)
-	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
-		w.WriteHeader(400)
+		w.WriteHeader(server.StatusBadRequest)
 		w.Write([]byte("Bad request"))
 		return
 	}
@@ -58,7 +50,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
 	if inMap {
 		response := fmt.Sprintf(`{"shortURL":"http://localhost:8080/%s"}`, shortURL)
-		w.WriteHeader(200)
+		w.WriteHeader(server.StatusOK)
 		w.Write([]byte(response))
 		return
 	}
@@ -76,14 +68,14 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	u.count[shortURL] = 0
 
 	response := fmt.Sprintf(`{"shortURL":"http://localhost:8080/%s"}`, shortURL)
-	w.WriteHeader(200)
+	w.WriteHeader(server.StatusOK)
 	w.Write([]byte(response))
 }
 
 // get method
 func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	if r.Method != "GET" {
-		w.WriteHeader(405)
+		w.WriteHeader(server.StatusMethodNotAllowed)
 		w.Write([]byte("Method Not Allowed"))
 		return
 	}
@@ -93,7 +85,7 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	shortURL := strings.TrimPrefix(path, "/")
 
 	if shortURL == "" {
-		w.WriteHeader(400)
+		w.WriteHeader(server.StatusBadRequest)
 		w.Write([]byte("Bad request"))
 		return
 	}
@@ -101,7 +93,7 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	originalURL, inMap := u.links[shortURL]
 
 	if !inMap {
-		w.WriteHeader(404)
+		w.WriteHeader(server.StatusNotFound)
 		w.Write([]byte("Not Found"))
 		return
 	}
@@ -109,6 +101,6 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	u.count[shortURL]++
 
 	w.SetHeader("Location", originalURL)
-	w.WriteHeader(302)
+	w.WriteHeader(server.StatusMoving)
 	w.Write([]byte("Redirecting to " + originalURL))
 }
