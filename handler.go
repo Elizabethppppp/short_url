@@ -80,15 +80,7 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	path := r.Path
-
-	shortURL := strings.TrimPrefix(path, "/")
-
-	if shortURL == "" {
-		w.WriteHeader(server.StatusBadRequest)
-		w.Write([]byte("Bad request"))
-		return
-	}
+	shortURL := r.Param("short")
 
 	originalURL, inMap := u.links[shortURL]
 
