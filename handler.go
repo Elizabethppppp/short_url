@@ -49,7 +49,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	}
 
 	if inMap {
-		response := fmt.Sprintf(`{"shortURL":"http://localhost:8080/%s"}`, shortURL)
+		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURL)
 		w.WriteHeader(server.StatusOK)
 		w.Write([]byte(response))
 		return
@@ -67,7 +67,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	u.links[shortURL] = originalURL
 	u.count[shortURL] = 0
 
-	response := fmt.Sprintf(`{"shortURL":"http://localhost:8080/%s"}`, shortURL)
+	response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURL)
 	w.WriteHeader(server.StatusOK)
 	w.Write([]byte(response))
 }

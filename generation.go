@@ -18,8 +18,8 @@ func toBase62(num uint64) string {
 		result = append(result, alphabet[0])
 	}
 
-	for i := 0; i < len(result)/2; i++ {
-		result[i], result[len(result)-1-i] = result[len(result)-1-i], result[i]
+	for i, j := 0, len(result)-1; i < j; i, j = i+1, j-1 {
+		result[i], result[j] = result[j], result[i]
 	}
 
 	return string(result)
