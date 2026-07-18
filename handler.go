@@ -5,19 +5,16 @@ import (
 	"strings"
 
 	server "github.com/Elizabethppppp/tcp_server"
+	"github.com/jackc/pgx/v5"
 )
 
 type URLstore struct {
-	links   map[string]string
-	count   map[string]int
-	counter uint64
+	db *pgx.Conn
 }
 
-func NewURLstore() *URLstore {
+func NewURLstore(db *pgx.Conn) *URLstore {
 	return &URLstore{
-		links:   make(map[string]string),
-		count:   make(map[string]int),
-		counter: 100000000000,
+		db: db,
 	}
 }
 
