@@ -96,3 +96,27 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	w.WriteHeader(server.StatusMoving)
 	w.Write([]byte("Redirecting to " + originalURL))
 }
+
+// get method for count
+func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(server.StatusMethodNotAllowed)
+		w.Write([]byte("Method Not Allowed"))
+		return
+	}
+
+	shortURL := r.Param("short")
+
+	_, inMap := u.links[shortURL]
+	if !inMap {
+		w.WriteHeader(server.StatusNotFound)
+		w.Write([]byte("Not Found"))
+		return
+	}
+
+	c := u.count[shortURL]
+
+	response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s", "count":%d}`, shortURL, c)
+	w.WriteHeader(server.StatusOK)
+	w.Write([]byte(response))
+}
