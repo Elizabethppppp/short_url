@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -34,35 +35,38 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	var shortURL string
-	var inMap bool
+	ctx := context.Background()
 
-	for short, original := range u.links {
-		if original == originalURL {
-			shortURL = short
-			inMap = true
-			break
-		}
-	}
-
-	if inMap {
-		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURL)
+	var shortURLdb string
+	err := u.db.QueryRow(ctx, "SELECT shortURL FROM url_schema.url WHERE originalURL = $1", originalURL).Scan(&shortURLdb)
+	if err == nil {
+		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
 		w.WriteHeader(server.StatusOK)
 		w.Write([]byte(response))
 		return
 	}
 
-	shortURL = u.generateShortURL()
-
-	for {
-		if _, in := u.links[shortURL]; !in {
-			break
-		}
-		shortURL = u.generateShortURL()
+	if err != pgx.ErrNoRows {
+		w.WriteHeader(server.StatusInternalServerError)
+		w.Write([]byte("Database Error"))
+		return
 	}
 
-	u.links[shortURL] = originalURL
-	u.count[shortURL] = 0
+	shortURL, counter, err := u.generateShortURL(ctx)
+	if err != nil {
+		w.WriteHeader(server.StatusInternalServerError)
+		w.Write([]byte("Counter Error"))
+		return
+	}
+
+	_, err = u.db.Exec(ctx, "INSERT INTO url_schema.url (originalURL, shortURL, count, last_counter) VALUES ($1, $2, 0, $3)",
+		originalURL, shortURL, counter)
+
+	if err != nil {
+		w.WriteHeader(server.StatusInternalServerError)
+		w.Write([]byte("Insert error"))
+		return
+	}
 
 	response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURL)
 	w.WriteHeader(server.StatusOK)
@@ -70,7 +74,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 }
 
 // get method
-func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
+/*func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	if r.Method != "GET" {
 		w.WriteHeader(server.StatusMethodNotAllowed)
 		w.Write([]byte("Method Not Allowed"))
@@ -116,4 +120,4 @@ func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 	response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s", "count":%d}`, shortURL, c)
 	w.WriteHeader(server.StatusOK)
 	w.Write([]byte(response))
-}
+}*/
