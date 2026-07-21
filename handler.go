@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -46,7 +47,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	if err != pgx.ErrNoRows {
+	if !errors.Is(err, pgx.ErrNoRows) {
 		w.WriteHeader(server.StatusInternalServerError)
 		w.Write([]byte("Database Error"))
 		return
@@ -87,7 +88,7 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 
 	var originalURL string
 	err := u.db.QueryRow(ctx, "SELECT originalURL FROM url_schema.url WHERE shortURL = $1", shortURL).Scan(&originalURL)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		w.WriteHeader(server.StatusNotFound)
 		w.Write([]byte("Not Found"))
 		return
@@ -124,7 +125,7 @@ func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 
 	var count int
 	err := u.db.QueryRow(ctx, "SELECT count FROM url_schema.url WHERE shortURL = $1", shortURL).Scan(&count)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		w.WriteHeader(server.StatusNotFound)
 		w.Write([]byte("Not Found"))
 		return
