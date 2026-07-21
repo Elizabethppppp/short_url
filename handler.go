@@ -110,7 +110,7 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	w.Write([]byte("Redirecting to " + originalURL))
 }
 
-/*// get method for count
+// get method for count
 func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 	if r.Method != "GET" {
 		w.WriteHeader(server.StatusMethodNotAllowed)
@@ -118,18 +118,24 @@ func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
+	ctx := context.Background()
+
 	shortURL := r.Param("short")
 
-	_, inMap := u.links[shortURL]
-	if !inMap {
+	var count int
+	err := u.db.QueryRow(ctx, "SELECT count FROM url_schema.url WHERE shortURL = $1", shortURL).Scan(&count)
+	if err == pgx.ErrNoRows {
 		w.WriteHeader(server.StatusNotFound)
 		w.Write([]byte("Not Found"))
 		return
 	}
-
-	c := u.count[shortURL]
+	if err != nil {
+		w.WriteHeader(server.StatusInternalServerError)
+		w.Write([]byte("Counter Error"))
+		return
+	}
 
 	response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s", "count":%d}`, shortURL, c)
 	w.WriteHeader(server.StatusOK)
 	w.Write([]byte(response))
-}*/
+}
