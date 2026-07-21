@@ -3,7 +3,7 @@
     "host": "localhost",
     "port": 5432,
     "user": "postgres",
-    "password": "hello1elephant",
-    "dbname": "URLstore"
+    "password": "your_password_here",
+    "dbname": "url"
   }
 }
