@@ -26,7 +26,7 @@ func main() {
 
 	mux := server.NewMux()
 	mux.Handle("/short", store.CreateShortURL)
-	//mux.Handle("/{short}", store.RedirectHandler)
+	mux.Handle("/{short}", store.RedirectHandler)
 	//mux.Handle("/count/{short}", store.CountShortURL)
 
 	if err := server.Listen(":8090", mux); err != nil {
