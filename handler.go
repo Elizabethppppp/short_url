@@ -135,7 +135,7 @@ func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s", "count":%d}`, shortURL, c)
+	response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s", "count":%d}`, shortURL, count)
 	w.WriteHeader(server.StatusOK)
 	w.Write([]byte(response))
 }
