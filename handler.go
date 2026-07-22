@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -11,10 +12,10 @@ import (
 )
 
 type URLstore struct {
-	db *pgx.Conn
+	db *sql.DB
 }
 
-func NewURLstore(db *pgx.Conn) *URLstore {
+func NewURLstore(db *sql.DB) *URLstore {
 	return &URLstore{
 		db: db,
 	}
@@ -39,7 +40,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	ctx := context.Background()
 
 	var shortURLdb string
-	err := u.db.QueryRow(ctx, "SELECT shortURL FROM url_schema.url WHERE originalURL = $1", originalURL).Scan(&shortURLdb)
+	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url_schema.url WHERE originalURL = $1", originalURL).Scan(&shortURLdb)
 	if err == nil {
 		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
 		w.WriteHeader(server.StatusOK)
@@ -60,7 +61,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	_, err = u.db.Exec(ctx, "INSERT INTO url_schema.url (originalURL, shortURL, count, last_counter) VALUES ($1, $2, 0, $3)",
+	_, err = u.db.ExecContext(ctx, "INSERT INTO url_schema.url (originalURL, shortURL, count, last_counter) VALUES ($1, $2, 0, $3)",
 		originalURL, shortURL, counter)
 
 	if err != nil {
@@ -87,7 +88,7 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	shortURL := r.Param("short")
 
 	var originalURL string
-	err := u.db.QueryRow(ctx, "SELECT originalURL FROM url_schema.url WHERE shortURL = $1", shortURL).Scan(&originalURL)
+	err := u.db.QueryRowContext(ctx, "SELECT originalURL FROM url_schema.url WHERE shortURL = $1", shortURL).Scan(&originalURL)
 	if errors.Is(err, pgx.ErrNoRows) {
 		w.WriteHeader(server.StatusNotFound)
 		w.Write([]byte("Not Found"))
@@ -99,7 +100,7 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	_, err1 := u.db.Exec(ctx, "UPDATE url_schema.url SET count = count + 1 WHERE shortURL = $1", shortURL)
+	_, err1 := u.db.ExecContext(ctx, "UPDATE url_schema.url SET count = count + 1 WHERE shortURL = $1", shortURL)
 	if err1 != nil {
 		w.WriteHeader(server.StatusInternalServerError)
 		w.Write([]byte("Update Error"))
@@ -124,7 +125,7 @@ func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 	shortURL := r.Param("short")
 
 	var count int
-	err := u.db.QueryRow(ctx, "SELECT count FROM url_schema.url WHERE shortURL = $1", shortURL).Scan(&count)
+	err := u.db.QueryRowContext(ctx, "SELECT count FROM url_schema.url WHERE shortURL = $1", shortURL).Scan(&count)
 	if errors.Is(err, pgx.ErrNoRows) {
 		w.WriteHeader(server.StatusNotFound)
 		w.Write([]byte("Not Found"))

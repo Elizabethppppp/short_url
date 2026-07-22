@@ -1,14 +1,12 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
+	db2 "test/db"
 
 	server "github.com/Elizabethppppp/tcp_server"
-	"github.com/jackc/pgx/v5"
 )
 
 type Config struct {
@@ -30,21 +28,20 @@ func main() {
 	var cfg Config
 	json.Unmarshal(file, &cfg)
 
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName)
-
-	db, err := pgx.Connect(context.Background(), dsn)
+	dbConn, err := db2.Connect(db2.Config{
+		Host:     cfg.DB.Host,
+		Port:     cfg.DB.Port,
+		User:     cfg.DB.User,
+		Password: cfg.DB.Password,
+		DBName:   cfg.DB.DBName,
+	})
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-	defer db.Close(context.Background())
 
-	err = db.Ping(context.Background())
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
+	defer dbConn.Close()
 
-	store := NewURLstore(db)
+	store := NewURLstore(dbConn)
 
 	mux := server.NewMux()
 	mux.Handle("/short", store.CreateShortURL)
