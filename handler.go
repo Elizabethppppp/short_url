@@ -48,7 +48,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	if !errors.Is(err, pgx.ErrNoRows) {
+	if !errors.Is(err, sql.ErrNoRows) {
 		w.WriteHeader(server.StatusInternalServerError)
 		w.Write([]byte("Database Error"))
 		return
