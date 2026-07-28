@@ -5,5 +5,9 @@
     "user": "postgres",
     "password": "your_password_here",
     "dbname": "url"
+  },
+  "logger": {
+    "level": "debug",
+    "format": "text"
   }
 }
