@@ -2,6 +2,16 @@ github.com/Elizabethppppp/tcp_server v0.3.0 h1:OyvPYEbN91ZXEVGyYszAtEPcojUrWDbEW
 github.com/Elizabethppppp/tcp_server v0.3.0/go.mod h1:6eIbwcSStODN0C8/Ej4jsL429yD/zu6AINDCLIphG2A=
 github.com/Elizabethppppp/tcp_server v0.4.0 h1:Umx2nkTq96dy/QSDI7layyJUXkGhUnVtV2xNC8dR2/A=
 github.com/Elizabethppppp/tcp_server v0.4.0/go.mod h1:6eIbwcSStODN0C8/Ej4jsL429yD/zu6AINDCLIphG2A=
+github.com/Elizabethppppp/tcp_server v0.6.0 h1:ZwEHetwr/VJ81LhXhX97vE5kEnRxHMU0Iyke9rapeVM=
+github.com/Elizabethppppp/tcp_server v0.6.0/go.mod h1:6eIbwcSStODN0C8/Ej4jsL429yD/zu6AINDCLIphG2A=
+github.com/Elizabethppppp/tcp_server v0.7.0 h1:+ZuRUThLDz9VCfwPOFg4NcgEYrrVu27B6S4tYQghL+4=
+github.com/Elizabethppppp/tcp_server v0.7.0/go.mod h1:6eIbwcSStODN0C8/Ej4jsL429yD/zu6AINDCLIphG2A=
+github.com/Elizabethppppp/tcp_server v0.7.1 h1:pYCpLii7h4PFIXVX/DK+GV3I077P2424AVGCNRWsxs8=
+github.com/Elizabethppppp/tcp_server v0.7.1/go.mod h1:6eIbwcSStODN0C8/Ej4jsL429yD/zu6AINDCLIphG2A=
+github.com/Elizabethppppp/tcp_server v0.7.2 h1:I/VLuYvuqQwv/i3gTU8BYJEt05iVyqcmxmrxPw52zKg=
+github.com/Elizabethppppp/tcp_server v0.7.2/go.mod h1:6eIbwcSStODN0C8/Ej4jsL429yD/zu6AINDCLIphG2A=
+github.com/Elizabethppppp/tcp_server v0.8.0 h1:zmwuv+5W5BrfLyPlzhWh1J6VgX7yY7jSl4Xm7JfBDlk=
+github.com/Elizabethppppp/tcp_server v0.8.0/go.mod h1:6eIbwcSStODN0C8/Ej4jsL429yD/zu6AINDCLIphG2A=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

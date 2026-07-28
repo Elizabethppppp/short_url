@@ -3,7 +3,7 @@ module test
 go 1.25.1
 
 require (
-	github.com/Elizabethppppp/tcp_server v0.4.0
+	github.com/Elizabethppppp/tcp_server v0.8.0
 	github.com/jackc/pgx/v5 v5.10.0
 )
 

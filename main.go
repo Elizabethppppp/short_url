@@ -77,9 +77,9 @@ func main() {
 	store := NewURLstore(dbConn)
 
 	mux := server.NewMux()
-	mux.Handle("post /short", store.CreateShortURL)
-	mux.Handle("get /{short}", store.RedirectHandler)
-	mux.Handle("GET /count/{short}", store.CountShortURL)
+	mux.Handle("post /short", LoggerMiddleware(store.CreateShortURL))
+	mux.Handle("get /{short}", LoggerMiddleware(store.RedirectHandler))
+	mux.Handle("GET /count/{short}", LoggerMiddleware(store.CountShortURL))
 
 	logger.Info("Routes registered successfully")
 
