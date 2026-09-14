@@ -14,16 +14,16 @@ type Config struct {
 		User     string `json:"user"`
 		Password string `json:"password"`
 		DBName   string `json:"dbname"`
-	} `json:"db" yaml:"db"`
+	} ` yaml:"db"`
 
 	Logger struct {
 		Level  string `json:"level"`
 		Format string `json:"format"`
-	} `json:"logger" yaml:"logger"`
+	} ` yaml:"logger"`
 
 	Server struct {
 		Addr string `json:"addr"`
-	} `json:"server" yaml:"server"`
+	} ` yaml:"server"`
 }
 
 func Load(path string) (*Config, error) {
