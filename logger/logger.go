@@ -53,35 +53,29 @@ func Info(msg string, v ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Info(msg, v...)
 	}
-	slog.Info(msg, v...)
 }
 
 func Warn(msg string, v ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Warn(msg, v...)
 	}
-	slog.Warn(msg, v...)
 }
 
 func Error(msg string, v ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Error(msg, v...)
 	}
-	slog.Error(msg, v...)
 }
 
 func Debug(msg string, v ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Debug(msg, v...)
 	}
-	slog.Debug(msg, v...)
 }
 
 func Fatal(msg string, v ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Error(msg, v...)
-	} else {
-		slog.Error(msg, v...)
 	}
 	os.Exit(1)
 }
