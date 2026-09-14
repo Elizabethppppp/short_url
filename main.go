@@ -21,7 +21,7 @@ func main() {
 	}); err != nil {
 		panic(err)
 	}
-	logger.Info("Config successfully parsed", "dbHost", cfg.DB.Host, "dbName", cfg.DB.DBName)
+	logger.Info("Config successfully parsed", "dbHost", cfg.DB.Host, "dbName", cfg.DB.DBName, "dbSchema", cfg.DB.Schema)
 
 	logger.Debug("Database conection", "host", cfg.DB.Host, "port", cfg.DB.Port, "dbName", cfg.DB.DBName)
 
@@ -31,6 +31,7 @@ func main() {
 		User:     cfg.DB.User,
 		Password: cfg.DB.Password,
 		DBName:   cfg.DB.DBName,
+		Schema:   cfg.DB.Schema,
 	})
 	if err != nil {
 		logger.Fatal("Fail connect database", err)

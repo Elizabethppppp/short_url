@@ -9,7 +9,6 @@ import (
 	"test/logger"
 
 	server "github.com/Elizabethppppp/tcp_server"
-	"github.com/jackc/pgx/v5"
 )
 
 type URLstore struct {
@@ -25,12 +24,6 @@ func NewURLstore(db *sql.DB) *URLstore {
 // post method
 func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
-	if r.Method != "POST" {
-		w.WriteHeader(server.StatusMethodNotAllowed)
-		w.Write([]byte("Method Not Allowed"))
-		return
-	}
-
 	originalURL := strings.TrimSpace(string(r.Body))
 
 	if originalURL == "" {
@@ -42,7 +35,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	ctx := context.Background()
 
 	var shortURLdb string
-	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url_schema.url WHERE originalURL = $1", originalURL).Scan(&shortURLdb)
+	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url WHERE originalURL = $1", originalURL).Scan(&shortURLdb)
 	if err == nil {
 		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
 		w.WriteHeader(server.StatusOK)
@@ -63,7 +56,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	_, err = u.db.ExecContext(ctx, "INSERT INTO url_schema.url (originalURL, shortURL, count, last_counter) VALUES ($1, $2, 0, $3)",
+	_, err = u.db.ExecContext(ctx, "INSERT INTO url (originalURL, shortURL, count, last_counter) VALUES ($1, $2, 0, $3)",
 		originalURL, shortURL, counter)
 
 	if err != nil {
@@ -83,15 +76,9 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 
 	shortURL := r.Param("short")
 
-	if r.Method != "GET" {
-		w.WriteHeader(server.StatusMethodNotAllowed)
-		w.Write([]byte("Method Not Allowed"))
-		return
-	}
-
 	var originalURL string
-	err := u.db.QueryRowContext(ctx, "SELECT originalURL FROM url_schema.url WHERE shortURL = $1", shortURL).Scan(&originalURL)
-	if errors.Is(err, pgx.ErrNoRows) {
+	err := u.db.QueryRowContext(ctx, "SELECT originalURL FROM url WHERE shortURL = $1", shortURL).Scan(&originalURL)
+	if errors.Is(err, sql.ErrNoRows) {
 		w.WriteHeader(server.StatusNotFound)
 		w.Write([]byte("Not Found"))
 		return
@@ -102,7 +89,7 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	_, err1 := u.db.ExecContext(ctx, "UPDATE url_schema.url SET count = count + 1 WHERE shortURL = $1", shortURL)
+	_, err1 := u.db.ExecContext(ctx, "UPDATE url SET count = count + 1 WHERE shortURL = $1", shortURL)
 	if err1 != nil {
 		w.WriteHeader(server.StatusInternalServerError)
 		w.Write([]byte("Update Error"))
@@ -120,15 +107,9 @@ func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 
 	shortURL := r.Param("short")
 
-	if r.Method != "GET" {
-		w.WriteHeader(server.StatusMethodNotAllowed)
-		w.Write([]byte("Method Not Allowed"))
-		return
-	}
-
 	var count int
-	err := u.db.QueryRowContext(ctx, "SELECT count FROM url_schema.url WHERE shortURL = $1", shortURL).Scan(&count)
-	if errors.Is(err, pgx.ErrNoRows) {
+	err := u.db.QueryRowContext(ctx, "SELECT count FROM url WHERE shortURL = $1", shortURL).Scan(&count)
+	if errors.Is(err, sql.ErrNoRows) {
 		w.WriteHeader(server.StatusNotFound)
 		w.Write([]byte("Not Found"))
 		return

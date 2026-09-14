@@ -4,6 +4,7 @@ db:
   user: user
   password: password
   dbname: url
+  schema: url_schema
 
 logger:
   level: debug
@@ -11,3 +12,4 @@ logger:
 
 server:
   addr: ":8090"
+

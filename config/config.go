@@ -9,21 +9,22 @@ import (
 
 type Config struct {
 	DB struct {
-		Host     string `json:"host"`
-		Port     int    `json:"port"`
-		User     string `json:"user"`
-		Password string `json:"password"`
-		DBName   string `json:"dbname"`
-	} ` yaml:"db"`
+		Host     string `yaml:"host"`
+		Port     int    `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		DBName   string `yaml:"dbname"`
+		Schema   string `yaml:"schema"`
+	} `yaml:"db"`
 
 	Logger struct {
-		Level  string `json:"level"`
-		Format string `json:"format"`
-	} ` yaml:"logger"`
+		Level  string `yaml:"level"`
+		Format string `yaml:"format"`
+	} `yaml:"logger"`
 
 	Server struct {
-		Addr string `json:"addr"`
-	} ` yaml:"server"`
+		Addr string `yaml:"addr"`
+	} `yaml:"server"`
 }
 
 func Load(path string) (*Config, error) {
