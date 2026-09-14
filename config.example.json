@@ -9,5 +9,8 @@
   "logger": {
     "level": "debug",
     "format": "text"
+  },
+  "server": {
+    "addr": ":8090"
   }
 }
