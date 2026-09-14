@@ -7,15 +7,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type DB struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DBName   string `yaml:"dbname"`
+	Schema   string `yaml:"schema"`
+}
+
 type Config struct {
-	DB struct {
-		Host     string `yaml:"host"`
-		Port     int    `yaml:"port"`
-		User     string `yaml:"user"`
-		Password string `yaml:"password"`
-		DBName   string `yaml:"dbname"`
-		Schema   string `yaml:"schema"`
-	} `yaml:"db"`
+	DB DB `yaml:"db"`
 
 	Logger struct {
 		Level  string `yaml:"level"`
@@ -59,6 +61,9 @@ func (c *Config) validate() error {
 	}
 	if c.DB.DBName == "" {
 		return fmt.Errorf("db.dbname is required")
+	}
+	if c.DB.Schema == "" {
+		return fmt.Errorf("db.schema is required")
 	}
 	if c.Logger.Level == "" {
 		c.Logger.Level = "info"

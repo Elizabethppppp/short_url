@@ -3,20 +3,12 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"test/config"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-type Config struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	DBName   string
-	Schema   string
-}
-
-func Connect(cfg Config) (*sql.DB, error) {
+func Connect(cfg config.DB) (*sql.DB, error) {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s search_path=%s sslmode=disable",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.Schema)
 	db, err := sql.Open("pgx", dsn)
