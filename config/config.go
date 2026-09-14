@@ -1,11 +1,8 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -36,18 +33,11 @@ func Load(path string) (*Config, error) {
 	}
 
 	var cfg Config
-	switch strings.ToLower(filepath.Ext(path)) {
-	case ".json", "":
-		if err := json.Unmarshal(file, &cfg); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal config file: %w", err)
-		}
-	case ".yaml", ".yml":
-		if err := yaml.Unmarshal(file, &cfg); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal config file: %w", err)
-		}
-	default:
-		return nil, fmt.Errorf("unknown config file type: %s", filepath.Ext(path))
+
+	if err := yaml.Unmarshal(file, &cfg); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal config file: %w", err)
 	}
+
 	if err := cfg.validate(); err != nil {
 		return nil, fmt.Errorf("failed to validate config file: %w", err)
 	}
