@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strings"
 	"test/logger"
 
 	server "github.com/Elizabethppppp/tcp_server"
@@ -24,7 +23,11 @@ func NewURLstore(db *sql.DB) *URLstore {
 // post method
 func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
-	originalURL := strings.TrimSpace(string(r.Body))
+	originalURL, err1 := validateUrl(string(r.Body))
+	if err1 != nil {
+		ResponseJSON(w, 400, err1)
+		return
+	}
 
 	if originalURL == "" {
 		w.WriteHeader(server.StatusBadRequest)
@@ -37,8 +40,9 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	var shortURLdb string
 	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url WHERE originalURL = $1", originalURL).Scan(&shortURLdb)
 	if err == nil {
-		fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
-		ResponseJSON(w, 200, err)
+		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
+		w.WriteHeader(server.StatusOK)
+		w.Write([]byte(response))
 		return
 	}
 
