@@ -25,14 +25,10 @@ func main() {
 
 	logger.Debug("Database conection", "host", cfg.DB.Host, "port", cfg.DB.Port, "dbName", cfg.DB.DBName)
 
-	dbConn, err := db2.Connect(db2.Config{
-		Host:     cfg.DB.Host,
-		Port:     cfg.DB.Port,
-		User:     cfg.DB.User,
-		Password: cfg.DB.Password,
-		DBName:   cfg.DB.DBName,
-		Schema:   cfg.DB.Schema,
-	})
+	dbConn, err := db2.Connect(cfg.DB)
+	if err != nil {
+		logger.Fatal("Fail connect database", err)
+	}
 	if err != nil {
 		logger.Fatal("Fail connect database", err)
 	}

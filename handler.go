@@ -37,22 +37,19 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	var shortURLdb string
 	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url WHERE originalURL = $1", originalURL).Scan(&shortURLdb)
 	if err == nil {
-		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
-		w.WriteHeader(server.StatusOK)
-		w.Write([]byte(response))
+		fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
+		ResponseJSON(w, 200, err)
 		return
 	}
 
 	if !errors.Is(err, sql.ErrNoRows) {
-		w.WriteHeader(server.StatusInternalServerError)
-		w.Write([]byte("Database Error"))
+		ResponseJSON(w, 500, err)
 		return
 	}
 
 	shortURL, counter, err := u.generateShortURL(ctx)
 	if err != nil {
-		w.WriteHeader(server.StatusInternalServerError)
-		w.Write([]byte("Counter Error"))
+		ResponseJSON(w, 500, err)
 		return
 	}
 
@@ -60,8 +57,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		originalURL, shortURL, counter)
 
 	if err != nil {
-		w.WriteHeader(server.StatusInternalServerError)
-		w.Write([]byte("Insert error"))
+		ResponseJSON(w, 500, err)
 		return
 	}
 
@@ -79,20 +75,17 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	var originalURL string
 	err := u.db.QueryRowContext(ctx, "SELECT originalURL FROM url WHERE shortURL = $1", shortURL).Scan(&originalURL)
 	if errors.Is(err, sql.ErrNoRows) {
-		w.WriteHeader(server.StatusNotFound)
-		w.Write([]byte("Not Found"))
+		ResponseJSON(w, 404, err)
 		return
 	}
 	if err != nil {
-		w.WriteHeader(server.StatusInternalServerError)
-		w.Write([]byte("Insert Error"))
+		ResponseJSON(w, 500, err)
 		return
 	}
 
 	_, err1 := u.db.ExecContext(ctx, "UPDATE url SET count = count + 1 WHERE shortURL = $1", shortURL)
 	if err1 != nil {
-		w.WriteHeader(server.StatusInternalServerError)
-		w.Write([]byte("Update Error"))
+		ResponseJSON(w, 500, err1)
 		return
 	}
 
@@ -110,14 +103,12 @@ func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 	var count int
 	err := u.db.QueryRowContext(ctx, "SELECT count FROM url WHERE shortURL = $1", shortURL).Scan(&count)
 	if errors.Is(err, sql.ErrNoRows) {
-		w.WriteHeader(server.StatusNotFound)
-		w.Write([]byte("Not Found"))
+		ResponseJSON(w, 404, err)
 		return
 	}
 	if err != nil {
 		logger.Error("Count Error", "shortURL", shortURL, "error", err)
-		w.WriteHeader(server.StatusInternalServerError)
-		w.Write([]byte("Counter Error"))
+		ResponseJSON(w, 500, err)
 		return
 	}
 
