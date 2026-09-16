@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"sync"
 	"test/logger"
 
 	server "github.com/Elizabethppppp/tcp_server"
@@ -12,6 +13,7 @@ import (
 
 type URLstore struct {
 	db *sql.DB
+	mu sync.Mutex
 }
 
 func NewURLstore(db *sql.DB) *URLstore {

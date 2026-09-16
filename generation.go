@@ -1,6 +1,8 @@
 package main
 
-import "context"
+import (
+	"context"
+)
 
 func toBase62(num uint64) string {
 	const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -28,7 +30,10 @@ func toBase62(num uint64) string {
 }
 
 func (u *URLstore) generateShortURL(ctx context.Context) (string, uint64, error) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
 	var currentCount uint64
+
 	err := u.db.QueryRowContext(ctx, "SELECT COALESCE(MAX(last_counter), 100000000000) FROM url_schema.url").Scan(&currentCount)
 
 	if err != nil {
