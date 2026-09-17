@@ -7,14 +7,14 @@ import (
 )
 
 type ErrorResponse struct {
-	Error      string `yaml:"error"`
-	Message    string `yaml:"message"`
-	MessageRUS string `yaml:"message_rus"`
+	Error     string `json:"error"`
+	Message   string `json:"message"`
+	MessageRU string `json:"messageRU"`
 }
 
 var errorResponseMessage = map[int]struct {
-	En  string
-	Rus string
+	En string
+	Ru string
 }{
 	200: {"OK", "OK"},
 	201: {"Created", "Создано"},
@@ -42,20 +42,20 @@ func ResponseJSON(w server.ResponseWriter, status int, codeError error) {
 	msg, ok := errorResponseMessage[status]
 	if !ok {
 		msg = struct {
-			En  string
-			Rus string
-		}{En: "Unknown", Rus: "Неизвестная ошибка"}
+			En string
+			Ru string
+		}{En: "Unknown", Ru: "Неизвестная ошибка"}
 	}
 
 	response := ErrorResponse{
-		Error:      code,
-		Message:    msg.En,
-		MessageRUS: msg.Rus,
+		Error:     code,
+		Message:   msg.En,
+		MessageRU: msg.Ru,
 	}
 
 	body, err := json.Marshal(response)
 	if err != nil {
-		w.Write([]byte(`{"code":"","message":"failed to marshal error","message_rus":"не удалось представитьв нужном формате"}`))
+		w.Write([]byte(`{"code":"","message":"failed to marshal error","messageRU":"не удалось представитьв нужном формате"}`))
 		return
 	}
 
