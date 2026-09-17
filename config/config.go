@@ -16,6 +16,10 @@ type DB struct {
 	Schema   string `yaml:"schema"`
 }
 
+type Server struct {
+	Addr string `yaml:"addr"`
+}
+
 type Config struct {
 	DB DB `yaml:"db"`
 
@@ -24,9 +28,7 @@ type Config struct {
 		Format string `yaml:"format"`
 	} `yaml:"logger"`
 
-	Server struct {
-		Addr string `yaml:"addr"`
-	} `yaml:"server"`
+	Server Server `yaml:"server"`
 }
 
 func Load(path string) (*Config, error) {

@@ -43,7 +43,7 @@ func main() {
 
 	logger.Info("Routes registered successfully")
 
-	if err := server.Listen(":8090", mux); err != nil {
+	if err := server.Listen(cfg.Server.Addr, mux); err != nil {
 		logger.Fatal("Fail listen", err)
 	}
 }
