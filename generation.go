@@ -30,11 +30,10 @@ func toBase62(num uint64) string {
 }
 
 func (u *URLStore) generateShortURL(ctx context.Context) (string, uint64, error) {
-	u.mu.Lock()
-	defer u.mu.Unlock()
+
 	var currentCount uint64
 
-	err := u.db.QueryRowContext(ctx, "SELECT COALESCE(MAX(last_counter), 100000000000) FROM url").Scan(&currentCount)
+	err := u.db.QueryRowContext(ctx, "SELECT nextval('url_schema.url_counter_seq')").Scan(&currentCount)
 
 	if err != nil {
 		return "", 0, err

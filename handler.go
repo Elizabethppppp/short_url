@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"sync"
 	"test/logger"
 
 	server "github.com/Elizabethppppp/tcp_server"
@@ -13,7 +12,6 @@ import (
 
 type URLStore struct {
 	db *sql.DB
-	mu sync.Mutex
 }
 
 func NewURLstore(db *sql.DB) *URLStore {
@@ -40,7 +38,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	ctx := context.Background()
 
 	var shortURLdb string
-	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url WHERE originalURL = $1", originalURL.String()).Scan(&shortURLdb)
+	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url WHERE originalURL = $1", originalURL.Raw).Scan(&shortURLdb)
 	if err == nil {
 		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
 		w.WriteHeader(server.StatusOK)
@@ -60,7 +58,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	}
 
 	_, err = u.db.ExecContext(ctx, "INSERT INTO url (originalURL, shortURL, count, last_counter) VALUES ($1, $2, 0, $3)",
-		originalURL.String(), shortURL, counter)
+		originalURL.Raw, shortURL, counter)
 
 	if err != nil {
 		ResponseJSON(w, 500, err)
