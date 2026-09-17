@@ -25,7 +25,7 @@ func NewURLstore(db *sql.DB) *URLStore {
 // post method
 func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
-	originalURL, err1 := ParseURL(string(r.Body))
+	originalURL, err1 := server.ParseURL(string(r.Body))
 	if err1 != nil {
 		ResponseJSON(w, 400, err1)
 		return
