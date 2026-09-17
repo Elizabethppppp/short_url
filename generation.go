@@ -33,13 +33,13 @@ func (u *URLStore) generateShortURL(ctx context.Context) (string, uint64, error)
 
 	var currentCount uint64
 
-	err := u.db.QueryRowContext(ctx, "SELECT nextval('url_schema.url_counter_seq')").Scan(&currentCount)
+	err := u.db.QueryRowContext(ctx, "SELECT nextval('url_seq')").Scan(&currentCount)
 
 	if err != nil {
 		return "", 0, err
 	}
 
-	newCounter := currentCount + 1
+	newCounter:=uint64(currentCount)
 
 	return toBase62(newCounter), newCounter, nil
 }
