@@ -11,21 +11,21 @@ import (
 	server "github.com/Elizabethppppp/tcp_server"
 )
 
-type URLstore struct {
+type URLStore struct {
 	db *sql.DB
 	mu sync.Mutex
 }
 
-func NewURLstore(db *sql.DB) *URLstore {
-	return &URLstore{
+func NewURLstore(db *sql.DB) *URLStore {
+	return &URLStore{
 		db: db,
 	}
 }
 
 // post method
-func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
+func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
-	originalURL, err1 := validateUrl(string(r.Body))
+	originalURL, err1 := ParseURL(string(r.Body))
 	if err1 != nil {
 		ResponseJSON(w, 400, err1)
 		return
@@ -73,7 +73,7 @@ func (u *URLstore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 }
 
 // get method
-func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
+func (u *URLStore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	ctx := context.Background()
 
 	shortURL := r.Param("short")
@@ -101,7 +101,7 @@ func (u *URLstore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 }
 
 // get method for count
-func (u *URLstore) CountShortURL(w server.ResponseWriter, r *server.Request) {
+func (u *URLStore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 	ctx := context.Background()
 
 	shortURL := r.Param("short")

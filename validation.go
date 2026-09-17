@@ -8,13 +8,13 @@ import (
 
 const maxLenURL = 2048
 
-func splitProtocol(url string) (protocol, domen string, ok bool) {
+func splitProtocol(url string) (protocol, domain string, ok bool) {
 
-	protocol, domen, ok = strings.Cut(url, "://")
+	protocol, domain, ok = strings.Cut(url, "://")
 	if !ok {
 		return "", "", false
 	}
-	return strings.ToLower(protocol), domen, true
+	return strings.ToLower(protocol), domain, true
 }
 
 func splitDomain(url string) (domain, path string) {
@@ -34,7 +34,7 @@ func splitPort(url string) (domain, port string, ok bool) {
 	return domain, port, true
 }
 
-func validateUrl(url string) (string, error) {
+func ParseURL(url string) (string, error) {
 	url = strings.TrimSpace(url)
 	if url == "" {
 		return "", errors.New("empty url")

@@ -29,9 +29,6 @@ func main() {
 	if err != nil {
 		logger.Fatal("Fail connect database", err)
 	}
-	if err != nil {
-		logger.Fatal("Fail connect database", err)
-	}
 
 	defer dbConn.Close()
 
