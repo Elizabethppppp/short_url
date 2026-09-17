@@ -31,7 +31,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	if originalURL == "" {
+	if originalURL == nil {
 		w.WriteHeader(server.StatusBadRequest)
 		w.Write([]byte("Bad request"))
 		return
@@ -40,7 +40,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	ctx := context.Background()
 
 	var shortURLdb string
-	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url WHERE originalURL = $1", originalURL).Scan(&shortURLdb)
+	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url WHERE originalURL = $1", originalURL.String()).Scan(&shortURLdb)
 	if err == nil {
 		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
 		w.WriteHeader(server.StatusOK)
@@ -60,7 +60,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	}
 
 	_, err = u.db.ExecContext(ctx, "INSERT INTO url (originalURL, shortURL, count, last_counter) VALUES ($1, $2, 0, $3)",
-		originalURL, shortURL, counter)
+		originalURL.String(), shortURL, counter)
 
 	if err != nil {
 		ResponseJSON(w, 500, err)
