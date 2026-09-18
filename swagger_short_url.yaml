@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: URL Shortener service
+  description: Сервис сокращения ссылок.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8090
+
+paths:
+  /short:
+    post:
+      summary: Сократить ссылку.
+      operationId: CreateShortURL
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: "https://example.com/page"
+      responses:
+        '200':
+          description: Ссылка успешно сокращена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortenResponse'
+              examples:
+                new:
+                  summary: Новая ссылка
+                  value:
+                    shortURL: "http://localhost:8090/abc123"
+                existing:
+                  summary: Уже существовала
+                  value:
+                    shortURL: "http://localhost:8090/xyz789"
+        '400':
+          description: Некорректный URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "invalid protocol"
+                message: "Bad Request"
+                messageRu: "Неверный запрос"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "ERROR: relation \"url_seq\" does not exist"
+                message: "Internal Server Error"
+                messageRu: "Внутрення ошибка сервера"
+
+  /{short}:
+    get:
+      summary: Переход по короткому коду.
+      description: Находит оригинальный URL по короткому коду
+      operationId: RedirectHandler
+      parameters:
+        - name: short
+          in: path
+          required: true
+          description: Короткий код
+          schema:
+            type: string
+          example: "abc123"
+      responses:
+        '302':
+          description: Редирект на оригинальный URL
+          headers:
+            Location:
+              description: Оригинальный URL
+              schema:
+                type: string
+                format: uri
+              example: "https://example.com/page"
+        '404':
+          description: Короткий код не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /count/{short}:
+    get:
+      summary: Количество переходов
+      description: Возвращает, сколько раз переходили по короткой ссылке.
+      operationId: CountShortURL
+      parameters:
+        - name: short
+          in: path
+          required: true
+          description: Короткий код
+          schema:
+            type: string
+          example: "abc123"
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+              example:
+                shortURL: "http://localhost:8090/abc123"
+                count: 42
+        '404':
+          description: Короткий код не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ShortenResponse:
+      type: object
+      required: [shortURL]
+      properties:
+        shortURL:
+          type: string
+          format: uri
+          example: "http://localhost:8090/abc123"
+
+    CountResponse:
+      type: object
+      required: [shortURL, count]
+      properties:
+        shortURL:
+          type: string
+          format: uri
+          example: "http://localhost:8090/abc123"
+        count:
+          type: integer
+          format: int64
+          minimum: 0
+          example: 42
+
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          description: Технический текст ошибки
+          example: "invalid protocol"
+        message:
+          type: string
+          description: Краткое описание для пользователя
+          example: "Bad Request"
+        messageRU:
+          type: string
+          description: Описание для пользователя на русском
+          example: "Некорректный запрос"

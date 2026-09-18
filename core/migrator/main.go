@@ -10,11 +10,11 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
 
 func main() {
 	configPath := flag.String("config", "config.yaml", "путь к config.yaml")
-	migrationsDir := flag.String("dir", "db/migrations", "путь к папке с миграциями")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
@@ -36,15 +36,19 @@ func main() {
 		log.Fatalf("migrate driver: %v", err)
 	}
 
-	sourceURL := "file://" + *migrationsDir
-
-	m, err := migrate.NewWithDatabaseInstance(sourceURL, "postgres", driver)
+	source, err := iofs.New(db2.MigrateFS, "migrations")
 	if err != nil {
-		log.Fatalf("migrate init: %v", err)
+		log.Fatalf("migrate iofs: %v", err)
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("migrate up: %v", err)
+	m, err := migrate.NewWithInstance("file", source, "postgres", driver)
+	if err != nil {
+		log.Fatalf("migrate: %v", err)
+	}
+
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		log.Fatalf("migrate: %v", err)
 	}
 
 	log.Println("migrations applied successfully")
