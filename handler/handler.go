@@ -1,10 +1,11 @@
-package main
+package handler
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"test/error_response"
 	"test/logger"
 
 	server "github.com/Elizabethppppp/tcp_server"
@@ -25,7 +26,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
 	originalURL, err1 := server.ParseURL(string(r.Body))
 	if err1 != nil {
-		ResponseJSON(w, 400, err1)
+		error_response.ResponseJSON(w, 400, err1)
 		return
 	}
 
@@ -47,13 +48,13 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	}
 
 	if !errors.Is(err, sql.ErrNoRows) {
-		ResponseJSON(w, 500, err)
+		error_response.ResponseJSON(w, 500, err)
 		return
 	}
 
 	shortURL, counter, err := u.generateShortURL(ctx)
 	if err != nil {
-		ResponseJSON(w, 500, err)
+		error_response.ResponseJSON(w, 500, err)
 		return
 	}
 
@@ -61,7 +62,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		originalURL.Raw, shortURL, counter)
 
 	if err != nil {
-		ResponseJSON(w, 500, err)
+		error_response.ResponseJSON(w, 500, err)
 		return
 	}
 
@@ -79,17 +80,17 @@ func (u *URLStore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	var originalURL string
 	err := u.db.QueryRowContext(ctx, "SELECT originalURL FROM url WHERE shortURL = $1", shortURL).Scan(&originalURL)
 	if errors.Is(err, sql.ErrNoRows) {
-		ResponseJSON(w, 404, err)
+		error_response.ResponseJSON(w, 404, err)
 		return
 	}
 	if err != nil {
-		ResponseJSON(w, 500, err)
+		error_response.ResponseJSON(w, 500, err)
 		return
 	}
 
 	_, err1 := u.db.ExecContext(ctx, "UPDATE url SET count = count + 1 WHERE shortURL = $1", shortURL)
 	if err1 != nil {
-		ResponseJSON(w, 500, err1)
+		error_response.ResponseJSON(w, 500, err1)
 		return
 	}
 
@@ -107,12 +108,12 @@ func (u *URLStore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 	var count int
 	err := u.db.QueryRowContext(ctx, "SELECT count FROM url WHERE shortURL = $1", shortURL).Scan(&count)
 	if errors.Is(err, sql.ErrNoRows) {
-		ResponseJSON(w, 404, err)
+		error_response.ResponseJSON(w, 404, err)
 		return
 	}
 	if err != nil {
 		logger.Error("Count Error", "shortURL", shortURL, "error", err)
-		ResponseJSON(w, 500, err)
+		error_response.ResponseJSON(w, 500, err)
 		return
 	}
 

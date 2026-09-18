@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"context"
@@ -39,7 +39,7 @@ func (u *URLStore) generateShortURL(ctx context.Context) (string, uint64, error)
 		return "", 0, err
 	}
 
-	newCounter:=uint64(currentCount)
+	newCounter := uint64(currentCount)
 
 	return toBase62(newCounter), newCounter, nil
 }

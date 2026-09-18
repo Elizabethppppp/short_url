@@ -3,7 +3,9 @@ package main
 import (
 	"test/config"
 	db2 "test/db"
+	"test/handler"
 	"test/logger"
+	"test/middleware"
 
 	server "github.com/Elizabethppppp/tcp_server"
 )
@@ -34,12 +36,12 @@ func main() {
 
 	logger.Info("Connection successfully established", "host", cfg.DB.Host, "port", cfg.DB.Port)
 
-	store := NewURLstore(dbConn)
+	store := handler.NewURLstore(dbConn)
 
 	mux := server.NewMux()
-	mux.Handle("post /short", LoggerMiddleware(store.CreateShortURL))
-	mux.Handle("get /{short}", LoggerMiddleware(store.RedirectHandler))
-	mux.Handle("GET /count/{short}", LoggerMiddleware(store.CountShortURL))
+	mux.Handle("post /short", middleware.LoggerMiddleware(store.CreateShortURL))
+	mux.Handle("get /{short}", middleware.LoggerMiddleware(store.RedirectHandler))
+	mux.Handle("GET /count/{short}", middleware.LoggerMiddleware(store.CountShortURL))
 
 	logger.Info("Routes registered successfully")
 
