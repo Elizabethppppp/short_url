@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"test/db/migrations"
 
 	"test/config"
 	db2 "test/db"
@@ -36,7 +37,7 @@ func main() {
 		log.Fatalf("migrate driver: %v", err)
 	}
 
-	source, err := iofs.New(db2.MigrateFS, "migrations")
+	source, err := iofs.New(migrations.MigrateFS, ".")
 	if err != nil {
 		log.Fatalf("migrate iofs: %v", err)
 	}
