@@ -1,4 +1,4 @@
-package url_short
+package urlShort
 
 import (
 	"context"

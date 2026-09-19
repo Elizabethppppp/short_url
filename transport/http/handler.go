@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"test/error_response"
+	"test/errorResponse"
 	"test/logger"
 	"test/serviceErrors"
 
@@ -17,11 +17,11 @@ func (t *Transport) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 	ctx := context.Background()
 	shortURL, err := t.tr.Create(ctx, string(r.Body))
 	if errors.Is(err, serviceErrors.ErrBadRequest) {
-		error_response.ResponseJSON(w, server.StatusBadRequest, err)
+		errorResponse.ResponseJSON(w, server.StatusBadRequest, err)
 		return
 	}
 	if err != nil {
-		error_response.ResponseJSON(w, server.StatusInternalServerError, err)
+		errorResponse.ResponseJSON(w, server.StatusInternalServerError, err)
 		return
 	}
 
@@ -38,11 +38,11 @@ func (t *Transport) RedirectHandler(w server.ResponseWriter, r *server.Request) 
 
 	originalURL, err := t.tr.Redirect(ctx, shortURL)
 	if errors.Is(err, serviceErrors.ErrNotFound) {
-		error_response.ResponseJSON(w, server.StatusNotFound, err)
+		errorResponse.ResponseJSON(w, server.StatusNotFound, err)
 		return
 	}
 	if err != nil {
-		error_response.ResponseJSON(w, server.StatusInternalServerError, err)
+		errorResponse.ResponseJSON(w, server.StatusInternalServerError, err)
 		return
 	}
 
@@ -59,12 +59,12 @@ func (t *Transport) CountShortURL(w server.ResponseWriter, r *server.Request) {
 
 	_, count, err := t.tr.Count(ctx, shortURL)
 	if errors.Is(err, serviceErrors.ErrNotFound) {
-		error_response.ResponseJSON(w, server.StatusNotFound, err)
+		errorResponse.ResponseJSON(w, server.StatusNotFound, err)
 		return
 	}
 	if err != nil {
 		logger.Error("Count Error", "shortURL", shortURL, "error", err)
-		error_response.ResponseJSON(w, server.StatusInternalServerError, err)
+		errorResponse.ResponseJSON(w, server.StatusInternalServerError, err)
 		return
 	}
 

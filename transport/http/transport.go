@@ -1,17 +1,17 @@
 package transport
 
 import (
-	"test/core/url_short"
+	"test/core/urlShort"
 	"test/middleware"
 
 	server "github.com/Elizabethppppp/tcp_server"
 )
 
 type Transport struct {
-	tr *url_short.ReduceService
+	tr *urlShort.ReduceService
 }
 
-func NewTransport(tr *url_short.ReduceService) *Transport {
+func NewTransport(tr *urlShort.ReduceService) *Transport {
 	return &Transport{
 		tr: tr,
 	}

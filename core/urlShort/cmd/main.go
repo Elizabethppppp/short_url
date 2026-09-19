@@ -2,7 +2,7 @@ package main
 
 import (
 	"test/config"
-	"test/core/url_short"
+	"test/core/urlShort"
 	db2 "test/db"
 	"test/logger"
 	"test/pgService"
@@ -37,7 +37,7 @@ func main() {
 
 	logger.Info("Connection successfully established", "host", cfg.DB.Host, "port", cfg.DB.Port)
 	pg := pgService.NewPgService(dbConn)
-	svc := url_short.NewReduceService(pg)
+	svc := urlShort.NewReduceService(pg)
 	tp := transport.NewTransport(svc)
 
 	handler := tp.Handler()
