@@ -6,16 +6,16 @@ import (
 	"fmt"
 	"test/error_response"
 	"test/logger"
-	"test/reduceService"
+	"test/web"
 
 	server "github.com/Elizabethppppp/tcp_server"
 )
 
 type URLStore struct {
-	s *reduceService.ReduceService
+	s *web.ReduceService
 }
 
-func NewURLstore(s *reduceService.ReduceService) *URLStore {
+func NewURLstore(s *web.ReduceService) *URLStore {
 	return &URLStore{
 		s: s,
 	}
@@ -26,7 +26,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
 	ctx := context.Background()
 	shortURL, err := u.s.Create(ctx, string(r.Body))
-	if errors.Is(err, reduceService.ErrBadRequest) {
+	if errors.Is(err, web.ErrBadRequest) {
 		error_response.ResponseJSON(w, server.StatusBadRequest, err)
 		return
 	}
@@ -47,7 +47,7 @@ func (u *URLStore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	shortURL := r.Param("short")
 
 	originalURL, err := u.s.Redirect(ctx, shortURL)
-	if errors.Is(err, reduceService.ErrNotFound) {
+	if errors.Is(err, web.ErrNotFound) {
 		error_response.ResponseJSON(w, server.StatusNotFound, err)
 		return
 	}
@@ -68,7 +68,7 @@ func (u *URLStore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 	shortURL := r.Param("short")
 
 	_, count, err := u.s.Count(ctx, shortURL)
-	if errors.Is(err, reduceService.ErrNotFound) {
+	if errors.Is(err, web.ErrNotFound) {
 		error_response.ResponseJSON(w, server.StatusNotFound, err)
 		return
 	}

@@ -7,7 +7,7 @@ import (
 	"test/logger"
 	"test/middleware"
 	"test/pgService"
-	"test/reduceService"
+	"test/web"
 
 	server "github.com/Elizabethppppp/tcp_server"
 )
@@ -38,7 +38,7 @@ func main() {
 
 	logger.Info("Connection successfully established", "host", cfg.DB.Host, "port", cfg.DB.Port)
 
-	store := handler.NewURLstore(reduceService.NewReduceService(pgService.NewPgService(dbConn)))
+	store := handler.NewURLstore(web.NewReduceService(pgService.NewPgService(dbConn)))
 
 	mux := server.NewMux()
 	mux.Handle("post /short", middleware.LoggerMiddleware(store.CreateShortURL))

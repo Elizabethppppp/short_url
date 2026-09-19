@@ -1,4 +1,4 @@
-package reduceService
+package web
 
 import (
 	"context"
