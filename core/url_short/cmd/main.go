@@ -5,9 +5,8 @@ import (
 	"test/core/url_short"
 	db2 "test/db"
 	"test/logger"
-	"test/middleware"
 	"test/pgService"
-	"test/transport/http"
+	transport "test/transport/http"
 
 	server "github.com/Elizabethppppp/tcp_server"
 )
@@ -37,17 +36,14 @@ func main() {
 	defer dbConn.Close()
 
 	logger.Info("Connection successfully established", "host", cfg.DB.Host, "port", cfg.DB.Port)
+	pg := pgService.NewPgService(dbConn)
+	svc := url_short.NewReduceService(pg)
+	tp := transport.NewTransport(svc)
 
-	store := transport.NewURLstore(url_short.NewReduceService(pgService.NewPgService(dbConn)))
-
-	mux := server.NewMux()
-	mux.Handle("post /short", middleware.LoggerMiddleware(store.CreateShortURL))
-	mux.Handle("get /{short}", middleware.LoggerMiddleware(store.RedirectHandler))
-	mux.Handle("GET /count/{short}", middleware.LoggerMiddleware(store.CountShortURL))
-
+	handler := tp.Handler()
 	logger.Info("Routes registered successfully")
 
-	if err := server.Listen(cfg.Server.Addr, mux); err != nil {
+	if err := server.Listen(cfg.Server.Addr, handler); err != nil {
 		logger.Fatal("Fail listen", err)
 	}
 }
