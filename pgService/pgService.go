@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	ErrNotFound = errors.New("not found")
-	ErrInternal = errors.New("internal server error")
+	ErrNotFound = errors.New("Not Found")
+	ErrInternal = errors.New("Internal Server Error")
 )
 
 type PgService struct {

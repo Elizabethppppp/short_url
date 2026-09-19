@@ -6,63 +6,36 @@ import (
 	"fmt"
 	"test/error_response"
 	"test/logger"
-	"test/pgService"
+	"test/reduceService"
 
 	server "github.com/Elizabethppppp/tcp_server"
 )
 
 type URLStore struct {
-	pg *pgService.PgService
+	s *reduceService.ReduceService
 }
 
-func NewURLstore(pg *pgService.PgService) *URLStore {
+func NewURLstore(s *reduceService.ReduceService) *URLStore {
 	return &URLStore{
-		pg: pg,
+		s: s,
 	}
 }
 
 // post method
 func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
-	originalURL, err1 := server.ParseURL(string(r.Body))
-	if err1 != nil {
-		error_response.ResponseJSON(w, 400, err1)
-		return
-	}
-
-	if originalURL == nil {
-		w.WriteHeader(server.StatusBadRequest)
-		w.Write([]byte("Bad request"))
-		return
-	}
-
 	ctx := context.Background()
-
-	shortURLdb, err := u.pg.GetShortURL(ctx, originalURL.Raw)
-	if err == nil {
-		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
-		w.WriteHeader(server.StatusOK)
-		w.Write([]byte(response))
+	shortURL, err := u.s.Create(ctx, string(r.Body))
+	if errors.Is(err, reduceService.ErrBadRequest) {
+		error_response.ResponseJSON(w, server.StatusBadRequest, err)
 		return
 	}
-
-	if errors.Is(err, pgService.ErrInternal) {
-		error_response.ResponseJSON(w, 500, err)
-		return
-	}
-
-	shortURL, counter, err := u.generateShortURL(ctx)
 	if err != nil {
-		error_response.ResponseJSON(w, 500, err)
+		error_response.ResponseJSON(w, server.StatusInternalServerError, err)
 		return
 	}
 
-	if err := u.pg.Insert(ctx, originalURL.Raw, shortURL, counter); err != nil {
-		error_response.ResponseJSON(w, 500, err)
-		return
-	}
-
-	response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURL)
+	response := fmt.Sprintf(`{"shortURL":"%q"}`, shortURL)
 	w.WriteHeader(server.StatusOK)
 	w.Write([]byte(response))
 }
@@ -73,18 +46,13 @@ func (u *URLStore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 
 	shortURL := r.Param("short")
 
-	originalURL, err := u.pg.RedirectShortURL(ctx, shortURL)
-	if errors.Is(err, pgService.ErrNotFound) {
-		error_response.ResponseJSON(w, 404, err)
+	originalURL, err := u.s.Redirect(ctx, shortURL)
+	if errors.Is(err, reduceService.ErrNotFound) {
+		error_response.ResponseJSON(w, server.StatusNotFound, err)
 		return
 	}
 	if err != nil {
-		error_response.ResponseJSON(w, 500, err)
-		return
-	}
-
-	if err1 := u.pg.UpdateCounter(ctx, shortURL); err1 != nil {
-		error_response.ResponseJSON(w, 500, err1)
+		error_response.ResponseJSON(w, server.StatusInternalServerError, err)
 		return
 	}
 
@@ -99,14 +67,14 @@ func (u *URLStore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 
 	shortURL := r.Param("short")
 
-	count, err := u.pg.GetCount(ctx, shortURL)
-	if errors.Is(err, pgService.ErrNotFound) {
-		error_response.ResponseJSON(w, 404, err)
+	_, count, err := u.s.Count(ctx, shortURL)
+	if errors.Is(err, reduceService.ErrNotFound) {
+		error_response.ResponseJSON(w, server.StatusNotFound, err)
 		return
 	}
 	if err != nil {
 		logger.Error("Count Error", "shortURL", shortURL, "error", err)
-		error_response.ResponseJSON(w, 500, err)
+		error_response.ResponseJSON(w, server.StatusInternalServerError, err)
 		return
 	}
 

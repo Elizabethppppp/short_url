@@ -1,4 +1,4 @@
-package handler
+package reduceService
 
 import (
 	"context"
@@ -29,9 +29,9 @@ func toBase62(num uint64) string {
 	return string(result)
 }
 
-func (u *URLStore) generateShortURL(ctx context.Context) (string, uint64, error) {
+func (service *ReduceService) generateShortURL(ctx context.Context) (string, uint64, error) {
 
-	currentCount, err := u.pg.NextCount(ctx)
+	currentCount, err := service.pg.NextCount(ctx)
 
 	if err != nil {
 		return "", 0, err
