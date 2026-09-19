@@ -2,22 +2,22 @@ package handler
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"test/error_response"
 	"test/logger"
+	"test/pgService"
 
 	server "github.com/Elizabethppppp/tcp_server"
 )
 
 type URLStore struct {
-	db *sql.DB
+	pg *pgService.PgService
 }
 
-func NewURLstore(db *sql.DB) *URLStore {
+func NewURLstore(pg *pgService.PgService) *URLStore {
 	return &URLStore{
-		db: db,
+		pg: pg,
 	}
 }
 
@@ -38,8 +38,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
 	ctx := context.Background()
 
-	var shortURLdb string
-	err := u.db.QueryRowContext(ctx, "SELECT shortURL FROM url WHERE originalURL = $1", originalURL.Raw).Scan(&shortURLdb)
+	shortURLdb, err := u.pg.GetShortURL(ctx, originalURL.Raw)
 	if err == nil {
 		response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s"}`, shortURLdb)
 		w.WriteHeader(server.StatusOK)
@@ -47,7 +46,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	if !errors.Is(err, sql.ErrNoRows) {
+	if errors.Is(err, pgService.ErrInternal) {
 		error_response.ResponseJSON(w, 500, err)
 		return
 	}
@@ -58,10 +57,7 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	_, err = u.db.ExecContext(ctx, "INSERT INTO url (originalURL, shortURL, count, last_counter) VALUES ($1, $2, 0, $3)",
-		originalURL.Raw, shortURL, counter)
-
-	if err != nil {
+	if err := u.pg.Insert(ctx, originalURL.Raw, shortURL, counter); err != nil {
 		error_response.ResponseJSON(w, 500, err)
 		return
 	}
@@ -77,9 +73,8 @@ func (u *URLStore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 
 	shortURL := r.Param("short")
 
-	var originalURL string
-	err := u.db.QueryRowContext(ctx, "SELECT originalURL FROM url WHERE shortURL = $1", shortURL).Scan(&originalURL)
-	if errors.Is(err, sql.ErrNoRows) {
+	originalURL, err := u.pg.RedirectShortURL(ctx, shortURL)
+	if errors.Is(err, pgService.ErrNotFound) {
 		error_response.ResponseJSON(w, 404, err)
 		return
 	}
@@ -88,8 +83,7 @@ func (u *URLStore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 		return
 	}
 
-	_, err1 := u.db.ExecContext(ctx, "UPDATE url SET count = count + 1 WHERE shortURL = $1", shortURL)
-	if err1 != nil {
+	if err1 := u.pg.UpdateCounter(ctx, shortURL); err1 != nil {
 		error_response.ResponseJSON(w, 500, err1)
 		return
 	}
@@ -105,9 +99,8 @@ func (u *URLStore) CountShortURL(w server.ResponseWriter, r *server.Request) {
 
 	shortURL := r.Param("short")
 
-	var count int
-	err := u.db.QueryRowContext(ctx, "SELECT count FROM url WHERE shortURL = $1", shortURL).Scan(&count)
-	if errors.Is(err, sql.ErrNoRows) {
+	count, err := u.pg.GetCount(ctx, shortURL)
+	if errors.Is(err, pgService.ErrNotFound) {
 		error_response.ResponseJSON(w, 404, err)
 		return
 	}

@@ -31,15 +31,11 @@ func toBase62(num uint64) string {
 
 func (u *URLStore) generateShortURL(ctx context.Context) (string, uint64, error) {
 
-	var currentCount uint64
-
-	err := u.db.QueryRowContext(ctx, "SELECT nextval('url_seq')").Scan(&currentCount)
+	currentCount, err := u.pg.NextCount(ctx)
 
 	if err != nil {
 		return "", 0, err
 	}
 
-	newCounter := uint64(currentCount)
-
-	return toBase62(newCounter), newCounter, nil
+	return toBase62(currentCount), currentCount, nil
 }
