@@ -1,4 +1,4 @@
-package web
+package url_short
 
 import (
 	"context"
