@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"test/core/url_short"
 	"test/error_response"
 	"test/logger"
+	"test/serviceErrors"
 
 	server "github.com/Elizabethppppp/tcp_server"
 )
@@ -16,7 +16,7 @@ func (t *Transport) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
 	ctx := context.Background()
 	shortURL, err := t.tr.Create(ctx, string(r.Body))
-	if errors.Is(err, url_short.ErrBadRequest) {
+	if errors.Is(err, serviceErrors.ErrBadRequest) {
 		error_response.ResponseJSON(w, server.StatusBadRequest, err)
 		return
 	}
@@ -37,7 +37,7 @@ func (t *Transport) RedirectHandler(w server.ResponseWriter, r *server.Request) 
 	shortURL := r.Param("short")
 
 	originalURL, err := t.tr.Redirect(ctx, shortURL)
-	if errors.Is(err, url_short.ErrNotFound) {
+	if errors.Is(err, serviceErrors.ErrNotFound) {
 		error_response.ResponseJSON(w, server.StatusNotFound, err)
 		return
 	}
@@ -58,7 +58,7 @@ func (t *Transport) CountShortURL(w server.ResponseWriter, r *server.Request) {
 	shortURL := r.Param("short")
 
 	_, count, err := t.tr.Count(ctx, shortURL)
-	if errors.Is(err, url_short.ErrNotFound) {
+	if errors.Is(err, serviceErrors.ErrNotFound) {
 		error_response.ResponseJSON(w, server.StatusNotFound, err)
 		return
 	}

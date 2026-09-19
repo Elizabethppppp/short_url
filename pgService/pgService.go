@@ -4,11 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-)
-
-var (
-	ErrNotFound = errors.New("Not Found")
-	ErrInternal = errors.New("Internal Server Error")
+	"test/serviceErrors"
 )
 
 type PgService struct {
@@ -26,7 +22,7 @@ func (pg *PgService) GetShortURL(ctx context.Context, originalURL string) (strin
 	var shortURL string
 	err := pg.db.QueryRowContext(ctx, "SELECT shortURL FROM url WHERE originalURL = $1", originalURL).Scan(&shortURL)
 	if errors.Is(err, sql.ErrNoRows) {
-		return "", ErrNotFound
+		return "", serviceErrors.ErrNotFound
 	}
 	if err != nil {
 		return "", err
@@ -40,7 +36,7 @@ func (pg *PgService) Insert(ctx context.Context, originalURL, shortURL string, l
 		originalURL, shortURL, last_counter)
 
 	if err != nil {
-		return ErrInternal
+		return serviceErrors.ErrInternal
 	}
 
 	return nil
@@ -59,10 +55,10 @@ func (pg *PgService) RedirectShortURL(ctx context.Context, shortURL string) (str
 	var originalURL string
 	err := pg.db.QueryRowContext(ctx, "SELECT originalURL FROM url WHERE shortURL = $1", shortURL).Scan(&originalURL)
 	if errors.Is(err, sql.ErrNoRows) {
-		return "", ErrNotFound
+		return "", serviceErrors.ErrNotFound
 	}
 	if err != nil {
-		return "", ErrInternal
+		return "", serviceErrors.ErrInternal
 	}
 	return originalURL, nil
 }
@@ -70,7 +66,7 @@ func (pg *PgService) RedirectShortURL(ctx context.Context, shortURL string) (str
 func (pg *PgService) UpdateCounter(ctx context.Context, shortURL string) error {
 	_, err := pg.db.ExecContext(ctx, "UPDATE url SET count = count + 1 WHERE shortURL = $1", shortURL)
 	if err != nil {
-		return ErrInternal
+		return serviceErrors.ErrInternal
 	}
 	return nil
 }
@@ -79,10 +75,10 @@ func (pg *PgService) GetCount(ctx context.Context, shortURL string) (int, error)
 	var count int
 	err := pg.db.QueryRowContext(ctx, "SELECT count FROM url WHERE shortURL = $1", shortURL).Scan(&count)
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, ErrNotFound
+		return 0, serviceErrors.ErrNotFound
 	}
 	if err != nil {
-		return 0, ErrInternal
+		return 0, serviceErrors.ErrInternal
 	}
 	return count, nil
 }

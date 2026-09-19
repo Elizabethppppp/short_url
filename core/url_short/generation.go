@@ -31,7 +31,7 @@ func toBase62(num uint64) string {
 
 func (service *ReduceService) generateShortURL(ctx context.Context) (string, uint64, error) {
 
-	currentCount, err := service.pg.NextCount(ctx)
+	currentCount, err := service.repo.NextCount(ctx)
 
 	if err != nil {
 		return "", 0, err
