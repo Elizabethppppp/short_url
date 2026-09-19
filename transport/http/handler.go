@@ -1,4 +1,4 @@
-package handler
+package transport
 
 import (
 	"context"
@@ -11,21 +11,11 @@ import (
 	server "github.com/Elizabethppppp/tcp_server"
 )
 
-type URLStore struct {
-	s *url_short.ReduceService
-}
-
-func NewURLstore(s *url_short.ReduceService) *URLStore {
-	return &URLStore{
-		s: s,
-	}
-}
-
 // post method
-func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
+func (t *Transport) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
 	ctx := context.Background()
-	shortURL, err := u.s.Create(ctx, string(r.Body))
+	shortURL, err := t.tr.Create(ctx, string(r.Body))
 	if errors.Is(err, url_short.ErrBadRequest) {
 		error_response.ResponseJSON(w, server.StatusBadRequest, err)
 		return
@@ -41,12 +31,12 @@ func (u *URLStore) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 }
 
 // get method
-func (u *URLStore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
+func (t *Transport) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 	ctx := context.Background()
 
 	shortURL := r.Param("short")
 
-	originalURL, err := u.s.Redirect(ctx, shortURL)
+	originalURL, err := t.tr.Redirect(ctx, shortURL)
 	if errors.Is(err, url_short.ErrNotFound) {
 		error_response.ResponseJSON(w, server.StatusNotFound, err)
 		return
@@ -62,12 +52,12 @@ func (u *URLStore) RedirectHandler(w server.ResponseWriter, r *server.Request) {
 }
 
 // get method for count
-func (u *URLStore) CountShortURL(w server.ResponseWriter, r *server.Request) {
+func (t *Transport) CountShortURL(w server.ResponseWriter, r *server.Request) {
 	ctx := context.Background()
 
 	shortURL := r.Param("short")
 
-	_, count, err := u.s.Count(ctx, shortURL)
+	_, count, err := t.tr.Count(ctx, shortURL)
 	if errors.Is(err, url_short.ErrNotFound) {
 		error_response.ResponseJSON(w, server.StatusNotFound, err)
 		return

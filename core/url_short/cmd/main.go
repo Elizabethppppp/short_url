@@ -4,10 +4,10 @@ import (
 	"test/config"
 	"test/core/url_short"
 	db2 "test/db"
-	"test/handler"
 	"test/logger"
 	"test/middleware"
 	"test/pgService"
+	"test/transport/http"
 
 	server "github.com/Elizabethppppp/tcp_server"
 )
@@ -38,7 +38,7 @@ func main() {
 
 	logger.Info("Connection successfully established", "host", cfg.DB.Host, "port", cfg.DB.Port)
 
-	store := handler.NewURLstore(url_short.NewReduceService(pgService.NewPgService(dbConn)))
+	store := transport.NewURLstore(url_short.NewReduceService(pgService.NewPgService(dbConn)))
 
 	mux := server.NewMux()
 	mux.Handle("post /short", middleware.LoggerMiddleware(store.CreateShortURL))
