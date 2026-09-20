@@ -27,7 +27,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("db connect: %v", err)
 	}
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			log.Printf("close db: %v", err)
+		}
+	}()
 
 	driver, err := postgres.WithInstance(dbConn, &postgres.Config{
 		MigrationsTable: "schema_migrations",

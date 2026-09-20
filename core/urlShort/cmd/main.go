@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"test/config"
 	"test/core/urlShort"
 	db2 "test/db"
@@ -33,7 +34,11 @@ func main() {
 		logger.Fatal("Fail connect database", err)
 	}
 
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			log.Printf("close db: %v", err)
+		}
+	}()
 
 	logger.Info("Connection successfully established", "host", cfg.DB.Host, "port", cfg.DB.Port)
 	pg := pgService.NewPgService(dbConn)

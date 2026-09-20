@@ -27,7 +27,7 @@ func (t *Transport) CreateShortURL(w server.ResponseWriter, r *server.Request) {
 
 	response := fmt.Sprintf(`{"shortURL":"%q"}`, shortURL)
 	w.WriteHeader(server.StatusOK)
-	w.Write([]byte(response))
+	_, _ = w.Write([]byte(response))
 }
 
 // get method
@@ -48,7 +48,7 @@ func (t *Transport) RedirectHandler(w server.ResponseWriter, r *server.Request) 
 
 	w.SetHeader("Location", originalURL)
 	w.WriteHeader(server.StatusMoving)
-	w.Write([]byte("Redirecting to " + originalURL))
+	_, _ = w.Write([]byte("Redirecting to " + originalURL))
 }
 
 // get method for count
@@ -70,5 +70,5 @@ func (t *Transport) CountShortURL(w server.ResponseWriter, r *server.Request) {
 
 	response := fmt.Sprintf(`{"shortURL":"http://localhost:8090/%s", "count":%d}`, shortURL, count)
 	w.WriteHeader(server.StatusOK)
-	w.Write([]byte(response))
+	_, _ = w.Write([]byte(response))
 }

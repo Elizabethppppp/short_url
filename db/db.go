@@ -13,7 +13,7 @@ func Connect(cfg config.DB) (*sql.DB, error) {
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.Schema)
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to open db: %w", err)
+		return nil, fmt.Errorf("failed to open db: %w", err)
 	}
 
 	if err := db.Ping(); err != nil {

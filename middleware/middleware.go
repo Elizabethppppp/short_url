@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"time"
 
@@ -54,7 +55,7 @@ func LoggerMiddleware(hand server.HandlerFunc) server.HandlerFunc {
 			logFields = append(logFields, "headers", r.Headers)
 		}
 
-		if r.Body != nil && len(r.Body) > 0 {
+		if len(r.Body) > 0 {
 			bodyStr := r.Body
 			logFields = append(logFields, "body", bodyStr)
 		}
@@ -115,9 +116,13 @@ func writeResponse(label string, logMap map[string]interface{}) {
 	if err != nil {
 		return
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Printf("close file: %v", err)
+		}
+	}()
 	separator := "--" + label + "--\n"
-	file.WriteString(separator)
-	file.Write(append(jsonData, '\n'))
+	_, _ = file.WriteString(separator)
+	_, _ = file.Write(append(jsonData, '\n'))
 
 }

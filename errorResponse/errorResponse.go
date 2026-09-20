@@ -55,9 +55,9 @@ func ResponseJSON(w server.ResponseWriter, status int, codeError error) {
 
 	body, err := json.Marshal(response)
 	if err != nil {
-		w.Write([]byte(`{"code":"","message":"failed to marshal error","messageRU":"не удалось представитьв нужном формате"}`))
+		_, _ = w.Write([]byte(`{"code":"","message":"failed to marshal error","messageRU":"не удалось представитьв нужном формате"}`))
 		return
 	}
 
-	w.Write(body)
+	_, _ = w.Write(body)
 }
